@@ -18,14 +18,21 @@ class App extends Component {
 
   constructor() {
     super();
-    this.outputText = "";
+    this.state = {
+      outputText: ""
+    };
 
   }
 
-    convert() {
+    convert = () => {
       var inputText = document.querySelector('#input').value;
   
       var lines = inputText.split(/\n/);
+      if(lines.length<2 || !lines[0].startsWith('Q:')) {
+        alert('Error format!');
+        this.setState({ outputText: ''});
+        return;
+      }
   
       var question = null;
       var answerLines = [];
@@ -34,25 +41,30 @@ class App extends Component {
         var line = lines[i].replace('\t', ' ');
         if(line.startsWith('Q:')) {
           if(i!=0) {
+            while (answerLines[answerLines.length-1]=="") {
+              answerLines.pop();
+            }
             outputLines.push(`${question}\t${answerLines.join('<br>')}`);
             answerLines=[];
           }
-          question=line.substring(2);
+          question=line.substring(2).trim();
         }
         else {
           answerLines.push(line);
         }
       }
+      while (answerLines[answerLines.length-1]=="") {
+        answerLines.pop();
+      }
       outputLines.push(`${question}\t${answerLines.join('<br>')}`);
   
   
-      this.outputText = outputLines.join('\n');
-      document.querySelector('#output').innerHTML=`<xmp>${this.outputText}</xmp>`;
+      this.setState({ outputText: outputLines.join('\n')});
     }
 
 
-  downloadQA() {
-    var output = document.querySelector('#output').textContent;
+  downloadQA = () => {
+    var output = this.state.outputText;
     if(output.length==0) {
       alert('No data available!');
     }
@@ -64,12 +76,21 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <textarea id='input'></textarea>
-        <div>
-          <button id='convert' onClick={this.convert}>Convert</button>
-          <button id='download' onClick={this.downloadQA}>Download</button>
+        <label htmlFor="input">Input QA Text:</label>
+        <textarea id='input' rows='10' className='form-control'></textarea>
+        <div className='form-group'>
+          <button id='convert' onClick={this.convert.bind(this)}>Convert</button>
+          <button id='download' onClick={this.downloadQA.bind(this)}>Download</button>
         </div>
-        <div id='output'></div>
+        { this.state.outputText.length > 0 &&
+        <div id='output'>
+          <label>Formated Text:</label>
+          <br/>
+          <pre>
+            {this.state.outputText}
+            </pre>
+        </div>
+        }
       </div>
     );
   }

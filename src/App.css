@@ -26,3 +26,12 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+body {
+  max-width: 800px;
+}
+
+pre {
+  text-align: left;
+  border: 2px solid black;
+}
